@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="card">
+    <h2>Entorno de Análisis y Seguridad de Aplicaciones Web</h2>
+    <p>Este laboratorio local está diseñado para la materia de <strong>Seguridad de la Información</strong> con el objetivo de estudiar el impacto de la ausencia de validaciones de entrada y contrastar patrones de código vulnerables frente a sus soluciones defensivas según las guías de <strong>OWASP</strong>.</p>
+</div>
+
+<div class="card">
+    <h3>Módulos de Estudio Disponibles</h3>
+    <ul>
+        <li>
+            <strong><a href="/sqli?tipo=vulnerable">Módulo 1: Inyección SQL (SQLi)</a></strong>
+            <p>Demuestra cómo la concatenación de variables en consultas a bases de datos altera la lógica de búsqueda y cómo se mitiga usando <em>Prepared Statements</em>.</p>
+        </li>
+        <li>
+            <strong><a href="/xss?tipo=vulnerable">Módulo 2: Cross-Site Scripting (XSS)</a></strong>
+            <p>Demuestra la diferencia entre interpretar entradas sin sanear en el navegador vs. aplicar escape contextual de entidades HTML.</p>
+        </li>
+    </ul>
+</div>
+
+<div class="card">
+    <h3>Instrucciones de Uso Local</h3>
+    <ol>
+        <li>Abre cualquiera de los dos módulos desde el menú superior.</li>
+        <li>Selecciona entre el modo <span class="badge badge-danger">Vulnerable</span> y el modo <span class="badge badge-success">Seguro</span>.</li>
+        <li>Observa cómo se construye y procesa la información en el backend.</li>
+    </ol>
+</div>
+{% endblock %}

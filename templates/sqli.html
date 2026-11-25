@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="card">
+    <h2>Módulo 1: Consulta de Base de Datos y Parámetros</h2>
+    <p>Estado actual del endpoint:
+        {% if tipo == 'vulnerable' %}
+            <span class="badge badge-danger">Modo Vulnerable (Concatenación Directa)</span>
+            <a href="/sqli?tipo=seguro" style="margin-left: 1rem; font-size: 0.9rem;">Cambiar a Modo Seguro</a>
+        {% else %}
+            <span class="badge badge-success">Modo Seguro (Prepared Statements)</span>
+            <a href="/sqli?tipo=vulnerable" style="margin-left: 1rem; font-size: 0.9rem;">Cambiar a Modo Vulnerable</a>
+        {% endif %}
+    </p>
+
+    <form method="GET" action="/sqli">
+        <input type="hidden" name="tipo" value="{{ tipo }}">
+        <div class="input-group">
+            <label for="usuario">Nombre de usuario a consultar:</label>
+            <input type="text" id="usuario" name="usuario" value="{{ usuario }}" placeholder="Ejemplo: admin, profesor...">
+        </div>
+        <button type="submit" class="btn">Ejecutar Consulta</button>
+    </form>
+</div>
+
+{% if usuario %}
+<div class="card">
+    <h3>Inspección de la Consulta en el Servidor</h3>
+    <p>Sentencia generada en el backend:</p>
+    <pre><code>{{ consulta_ejecutada }}</code></pre>
+
+    {% if error %}
+        <div class="alert-error">
+            <strong>Error SQL detectado:</strong> {{ error }}
+        </div>
+    {% endif %}
+
+    <h3>Resultados Devueltos:</h3>
+    {% if resultados %}
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Usuario</th>
+                    <th>Rol</th>
+                    <th>Email</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for fila in resultados %}
+                <tr>
+                    <td>{{ fila[0] }}</td>
+                    <td>{{ fila[1] }}</td>
+                    <td>{{ fila[2] }}</td>
+                    <td>{{ fila[3] }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>No se encontraron registros que coincidan con la búsqueda.</p>
+    {% endif %}
+</div>
+{% endif %}
+
+<div class="card">
+    <h3>Análisis Técnico de Seguridad</h3>
+    {% if tipo == 'vulnerable' %}
+        <p><strong>¿Por qué es vulnerable este modo?</strong></p>
+        <p>El backend utiliza formato directo de cadenas (<code>f"SELECT ... WHERE usuario = '{query_param}'"</code>). Esto permite que cualquier comilla simple cierre el valor original y altere la gramática SQL de la consulta.</p>
+        <p><strong>Solución recomendada por OWASP:</strong> Utilizar consultas parametrizadas donde el motor de base de datos trata el valor de entrada estrictamente como dato literal y nunca como código ejecutable.</p>
+    {% else %}
+        <p><strong>¿Por qué es seguro este modo?</strong></p>
+        <p>El backend utiliza marcadores de posición (<code>?</code> en SQLite) y envía los parámetros de forma independiente al motor de base de datos. Aun si la entrada contiene caracteres como comillas o comandos SQL, el motor no los interpreta como instrucciones.</p>
+    {% endif %}
+</div>
+{% endblock %}

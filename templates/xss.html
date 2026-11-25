@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="card">
+    <h2>Módulo 2: Renderizado de Entradas de Usuario (XSS)</h2>
+    <p>Estado actual del endpoint:
+        {% if tipo == 'vulnerable' %}
+            <span class="badge badge-danger">Modo Vulnerable (Renderizado sin Escape)</span>
+            <a href="/xss?tipo=seguro" style="margin-left: 1rem; font-size: 0.9rem;">Cambiar a Modo Seguro</a>
+        {% else %}
+            <span class="badge badge-success">Modo Seguro (Escape de Entidades HTML)</span>
+            <a href="/xss?tipo=vulnerable" style="margin-left: 1rem; font-size: 0.9rem;">Cambiar a Modo Vulnerable</a>
+        {% endif %}
+    </p>
+
+    <form method="GET" action="/xss">
+        <input type="hidden" name="tipo" value="{{ tipo }}">
+        <div class="input-group">
+            <label for="mensaje">Texto o comentario a publicar:</label>
+            <input type="text" id="mensaje" name="mensaje" value="{{ mensaje }}" placeholder="Escribe un mensaje de prueba...">
+        </div>
+        <button type="submit" class="btn">Publicar Mensaje</button>
+    </form>
+</div>
+
+{% if mensaje %}
+<div class="card">
+    <h3>Resultado en Pantalla</h3>
+    <div style="padding: 1rem; border: 1px dashed #9ca3af; border-radius: 4px; background: #fafafa;">
+        {% if tipo == 'vulnerable' %}
+            {# Se utiliza |safe para emular la ausencia intencional de filtrado #}
+            {{ contenido_renderizado|safe }}
+        {% else %}
+            {# Renderizado escapado #}
+            {{ contenido_renderizado }}
+        {% endif %}
+    </div>
+
+    <h3 style="margin-top: 1.5rem;">Código HTML que recibió el navegador:</h3>
+    <pre><code>{% if tipo == 'vulnerable' %}{{ contenido_renderizado }}{% else %}{{ contenido_renderizado|e }}{% endif %}</code></pre>
+</div>
+{% endif %}
+
+<div class="card">
+    <h3>Análisis Técnico de Seguridad</h3>
+    {% if tipo == 'vulnerable' %}
+        <p><strong>Riesgo identificado:</strong> Al incluir directamente cadenas del usuario en el árbol DOM sin codificación (*output encoding*), el navegador interpreta cualquier elemento HTML (por ejemplo, etiquetas con eventos o scripts) como parte del diseño del documento.</p>
+    {% else %}
+        <p><strong>Mecanismo defensivo aplicado:</strong> Las funciones de escape convierten caracteres reservados como <code>&lt;</code>, <code>&gt;</code> y <code>&amp;</code> en sus entidades correspondientes (<code>&amp;lt;</code>, <code>&amp;gt;</code>, <code>&amp;amp;</code>), garantizando que el navegador las dibuje como texto visible sin ejecutarlas.</p>
+    {% endif %}
+</div>
+{% endblock %}
